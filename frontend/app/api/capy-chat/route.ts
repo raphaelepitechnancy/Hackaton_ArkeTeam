@@ -117,31 +117,51 @@ function getLocalCapyResponse(
 // Appel Ollama local avec timeout et fallback
 async function getOllamaResponse(question: string, demarches: CapyRequest["demarches"]): Promise<string | null> {
   try {
-    // Construire le contexte des démarches
+    // Construire le contexte des démarches avec priorités
+    const p1 = demarches.filter((d) => (d.priorite ?? 2) === 1);
+    const p2 = demarches.filter((d) => (d.priorite ?? 2) > 1);
+
     const demarachesContext = demarches
-      .map((d) => `- ${d.titre}: ${d.description_simple} (Documents: ${d.documents.join(", ")})`)
-      .join("\n");
+      .map((d) => {
+        const priority = (d.priorite ?? 2) === 1 ? "🟢 PRIORITAIRE" : "🟡 Important";
+        const docs = d.documents.length > 0 ? `Documents: ${d.documents.join(", ")}` : "Pas de documents spécifiques";
+        return `${priority} - ${d.titre}\n  ${d.description_simple}\n  ${docs}`;
+      })
+      .join("\n\n");
 
-    const prompt = `Tu es Capy, un assistant administratif sympa pour jeunes adultes de 18-25 ans en France.
-Tu répondS court (max 3 phrases), naturel, sans jargon administratif, comme on parlerait entre potes.
-RÈGLE ABSOLUE: Tu répondS UNIQUEMENT à partir des démarches listées ci-dessous. Jamais tu n'inventes d'aide, de droit ou de condition qui ne sont pas dans la liste.
+    const systemPrompt = `Tu es Capy, assistant administratif pour jeunes adultes en France.
+RÈGLES ABSOLUES:
+1. Tu aides UNIQUEMENT à comprendre les démarches affichées ci-dessous.
+2. Tu n'inventes JAMAIS d'aides, de droits ou de conditions qui ne sont pas listées.
+3. Tu expliques simplement et humainement.
+4. Réponses courtes (1-3 phrases), rassurantes, concrètes.
+5. Français naturel, sans jargon administratif.
 
-Démarches qu'on affiche à l'utilisateur:
+CONTEXTE - Démarches affichées:
 ${demarachesContext}
+
+PRIORITÉS:
+- ${p1.length > 0 ? `À faire EN PREMIER: ${p1.map((d) => d.titre).join(", ")}` : "Pas de démarche prioritaire 1"}
+- ${p2.length > 0 ? `ENSUITE: ${p2.map((d) => d.titre).join(", ")}` : "Pas de démarche prioritaire 2"}`;
+
+    const fullPrompt = `${systemPrompt}
 
 Question de l'utilisateur: "${question}"
 
-Réponds en français naturel, jeune, rassurante, max 3 courtes phrases:`;
+Réponds maintenant (court, naturel, rassurant):`;
+
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3000);
+
+    console.log("[Capy] Calling Ollama with question:", question.substring(0, 50));
 
     const response = await fetch("http://localhost:11434/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "llama3.2:3b",
-        prompt,
+        prompt: fullPrompt,
         stream: false,
       }),
       // @ts-ignore
