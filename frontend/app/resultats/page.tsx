@@ -601,6 +601,108 @@ function ResultatsContenu() {
       {/* ---- BLOC CAPY ---- */}
       {demarches.length > 0 && <CapyChatSection demarches={demarches} />}
 
+      {/* ---- ANALYSER UN DOCUMENT ---- */}
+      {demarches.length > 0 && (
+        <section className="mb-8" style={{ marginTop: 24 }}>
+          <div
+            style={{
+              background: "linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%)",
+              border: "1px solid #F59E0B",
+              borderRadius: 16,
+              padding: 24,
+            }}
+          >
+            {/* En-tête */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 16,
+              }}
+            >
+              <span style={{ fontSize: 28 }} aria-hidden="true">
+                📄
+              </span>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#1F2937" }}>
+                  Bientôt : Envoie un document à Capy
+                </h3>
+                <p style={{ fontSize: 13, color: "#6B7280" }}>
+                  Capy explique les documents, il ne les conserve pas.
+                </p>
+              </div>
+            </div>
+
+            {/* Description */}
+            <p
+              style={{
+                fontSize: 13,
+                color: "#374151",
+                lineHeight: 1.6,
+                marginBottom: 16,
+              }}
+            >
+              <strong>Exemples :</strong> bail, attestation CAF, courrier administratif, fiche de paie anonymisée.
+            </p>
+
+            {/* Bouton upload */}
+            <button
+              disabled
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                background: "rgba(255, 255, 255, 0.7)",
+                border: "2px dashed #D97706",
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#92400E",
+                cursor: "not-allowed",
+                opacity: 0.6,
+                marginBottom: 16,
+                transition: "all 0.2s",
+              }}
+            >
+              📤 Importer un document (phase 2)
+            </button>
+
+            {/* Exemple simulé */}
+            <div
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid #E5E7EB",
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 12,
+              }}
+            >
+              <p style={{ fontSize: 12, fontWeight: 600, color: "#4B5563", marginBottom: 8 }}>
+                📋 Exemple simulé : Fiche de paie anonymisée
+              </p>
+              <p style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.5 }}>
+                <strong>Capy peut t'aider à comprendre :</strong> salaire net, cotisations sociales, déductions,
+                informations utiles pour une demande d'aide logement ou de bourse.
+              </p>
+            </div>
+
+            {/* Avertissement RGPD */}
+            <div
+              style={{
+                background: "rgba(239, 68, 68, 0.1)",
+                border: "1px solid #F87171",
+                borderRadius: 8,
+                padding: 12,
+              }}
+            >
+              <p style={{ fontSize: 11, color: "#991B1B", fontWeight: 500, lineHeight: 1.5 }}>
+                <strong>🔒 Respect de ta vie privée :</strong> Ne téléverse pas de document réel contenant des données personnelles pendant cette démo. La fonction d'analyse complète sera disponible en phase 2 avec anonymisation locale.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ---- AUCUN RÉSULTAT ---- */}
       {demarches.length === 0 && (
         <div
