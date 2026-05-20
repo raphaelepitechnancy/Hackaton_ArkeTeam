@@ -41,20 +41,17 @@ function detectIntention(question: string): Intention {
   return "other";
 }
 
-// Réponse locale contextualisée
+// Réponse locale contextualisée (fallback)
 function getLocalCapyResponse(
   question: string,
   demarches: CapyRequest["demarches"]
 ): string {
   const intention = detectIntention(question);
-  const p1 = demarches.filter((d) => d.priorite === 1);
-  const p2 = demarches.filter((d) => d.priorite > 1);
-
-  // Construire contexte simple
-  const hasManyDemarches = demarches.length >= 4;
-  const hasDocuments = demarches.some((d) => d.documents && d.documents.length > 0);
   const p1Safe = demarches.filter((d) => (d.priorite ?? 2) === 1);
   const p2Safe = demarches.filter((d) => (d.priorite ?? 2) > 1);
+
+  const hasManyDemarches = demarches.length >= 4;
+  const hasDocuments = demarches.some((d) => d.documents && d.documents.length > 0);
 
   switch (intention) {
     case "start":
@@ -117,6 +114,63 @@ function getLocalCapyResponse(
   }
 }
 
+// Appel Ollama local avec timeout et fallback
+async function getOllamaResponse(question: string, demarches: CapyRequest["demarches"]): Promise<string | null> {
+  try {
+    // Construire le contexte des démarches
+    const demarachesContext = demarches
+      .map((d) => `- ${d.titre}: ${d.description_simple} (Documents: ${d.documents.join(", ")})`)
+      .join("\n");
+
+    const prompt = `Tu es Capy, un assistant administratif sympa pour jeunes adultes de 18-25 ans en France.
+Tu répondS court (max 3 phrases), naturel, sans jargon administratif, comme on parlerait entre potes.
+RÈGLE ABSOLUE: Tu répondS UNIQUEMENT à partir des démarches listées ci-dessous. Jamais tu n'inventes d'aide, de droit ou de condition qui ne sont pas dans la liste.
+
+Démarches qu'on affiche à l'utilisateur:
+${demarachesContext}
+
+Question de l'utilisateur: "${question}"
+
+Réponds en français naturel, jeune, rassurante, max 3 courtes phrases:`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    const response = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama3.2:3b",
+        prompt,
+        stream: false,
+      }),
+      // @ts-ignore
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      console.warn(`[Capy] Ollama error: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const text = data.response?.trim();
+
+    if (!text) {
+      console.warn("[Capy] Ollama returned empty response");
+      return null;
+    }
+
+    console.log("[Capy] Ollama response generated");
+    return text;
+  } catch (error) {
+    console.warn("[Capy] Ollama unavailable, using fallback", error instanceof Error ? error.message : String(error));
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   let question = "";
   let demarches: CapyRequest["demarches"] = [];
@@ -130,12 +184,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ response: getLocalCapyResponse(question, demarches) });
     }
 
-    // Mode local sécurisé sans API externe
-    console.log("[Capy] Mode local sécurisé activé");
-    const response = getLocalCapyResponse(question, demarches);
-    return NextResponse.json({ response });
+    // Essayer Ollama d'abord
+    console.log("[Capy] Trying Ollama local LLM");
+    const ollamaResponse = await getOllamaResponse(question, demarches);
+
+    if (ollamaResponse) {
+      return NextResponse.json({ response: ollamaResponse });
+    }
+
+    // Fallback à la détection d'intention locale
+    console.log("[Capy] Falling back to local intention detection");
+    const localResponse = getLocalCapyResponse(question, demarches);
+    return NextResponse.json({ response: localResponse });
   } catch (error) {
-    console.warn("[Capy] Erreur lors du traitement", error);
+    console.warn("[Capy] Request processing error", error);
     return NextResponse.json({ response: "Je peux t'aider ! Pose une question sur tes démarches." });
   }
 }
