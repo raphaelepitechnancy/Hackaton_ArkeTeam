@@ -39,47 +39,34 @@ const capyQuestions = [
   },
 ];
 
+type Message = { role: "user" | "capy"; text: string };
+
 function CapyChatSection({ demarches }: { demarches: Demarche[] }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [capyText, setCapyText] = useState<string>("");
   const [capyTextSource, setCapyTextSource] = useState<"llm" | "static">("static");
   const [capyLoading, setCapyLoading] = useState(false);
   const [userInput, setUserInput] = useState<string>("");
-  const [freeTextResponse, setFreeTextResponse] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
 
   function handleCapyQuestion(questionId: string) {
     const question = capyQuestions.find((q) => q.id === questionId);
     if (!question) return;
 
-    setActiveId(questionId);
-    setCapyText(question.reponse); // texte statique immédiat
-    setCapyTextSource("static");
-    setCapyLoading(true);
+    // Ajouter le message utilisateur (question rapide)
+    setMessages((prev) => [...prev, { role: "user", text: question.label }]);
 
-    simplifyWithLLM(
-      {
-        titre: "Conseil Capy",
-        description_simple: question.reponse,
-        pour_qui: [],
-        documents: [],
-        source: "CapAutonomie",
-      },
-      question.reponse
-    ).then((result) => {
-      setCapyText(result.text);
-      setCapyTextSource(result.source);
-      setCapyLoading(false);
+    // Générer la réponse (OpenAI ou fallback)
+    getCapyResponse(question.label).then((response) => {
+      setMessages((prev) => [...prev, { role: "capy", text: response }]);
     });
   }
 
   const activeQuestion = capyQuestions.find((q) => q.id === activeId) ?? null;
 
-  // Keyword matching pour les questions libres
-  function handleFreeTextSubmit() {
-    if (!userInput.trim()) return;
-
-    const input = userInput.toLowerCase();
-    let response = "";
+  // Fallback par mots-clés
+  function getKeywordResponse(userQuestion: string): string {
+    const input = userQuestion.toLowerCase();
 
     if (
       input.includes("commence") ||
@@ -89,9 +76,9 @@ function CapyChatSection({ demarches }: { demarches: Demarche[] }) {
     ) {
       const p1 = demarches.filter((d) => d.priorite === 1);
       if (p1.length > 0) {
-        response = `Commence par celles en vert : ${p1.map((d) => d.titre).join(", ")}. Ce sont les plus urgentes.`;
+        return `Commence par celles en vert : ${p1.map((d) => d.titre).join(", ")}. Ce sont les plus urgentes.`;
       } else {
-        response = "Commence par les démarches en haut de la liste.";
+        return "Commence par les démarches en haut de la liste.";
       }
     } else if (
       input.includes("document") ||
@@ -103,38 +90,77 @@ function CapyChatSection({ demarches }: { demarches: Demarche[] }) {
         .flatMap((d) => d.documents.slice(0, 2));
       const uniqueDocs = [...new Set(allDocs)];
       if (uniqueDocs.length > 0) {
-        response = `Documents à préparer : ${uniqueDocs.slice(0, 5).join(", ")}. Demande à ta famille ce que tu n'as pas.`;
+        return `Documents à préparer : ${uniqueDocs.slice(0, 5).join(", ")}. Demande à ta famille ce que tu n'as pas.`;
       } else {
-        response = "Regroupe les documents listés sous chaque démarche.";
+        return "Regroupe les documents listés sous chaque démarche.";
       }
     } else if (
       input.includes("pourquoi") ||
       input.includes("important") ||
       input.includes("obligatoire")
     ) {
-      response =
-        "Chaque démarche te protège ou t'aide financièrement. Par exemple, la CAF te verse de l'argent pour le loyer. La Sécu te couvre en cas de problème. C'est pas optionnel, c'est vital.";
+      return "Chaque démarche te protège ou t'aide financièrement. Par exemple, la CAF te verse de l'argent pour le loyer. La Sécu te couvre en cas de problème. C'est pas optionnel, c'est vital.";
     } else if (
       input.includes("source") ||
       input.includes("officiel") ||
       input.includes("vérifier")
     ) {
-      response =
-        "Clique sur les boutons 'Lien officiel' de chaque démarche. C'est la source directe du gouvernement, le plus fiable. Tu peux aussi voir la page Sources pour d'où vient tout.";
+      return "Clique sur les boutons 'Lien officiel' de chaque démarche. C'est la source directe du gouvernement, le plus fiable. Tu peux aussi voir la page Sources pour d'où vient tout.";
     } else if (
       input.includes("upload") ||
       input.includes("fichier") ||
       input.includes("envoyer document")
     ) {
-      response =
-        "Bientôt tu pourras envoyer tes documents directement ici. Pour maintenant, suis les liens officiels.";
+      return "Bientôt tu pourras envoyer tes documents directement ici. Pour maintenant, suis les liens officiels.";
     } else {
-      response =
-        "Je peux t'aider sur : par quoi commencer, quels documents préparer, pourquoi c'est important, ou où vérifier les infos officielles. Pose une question là-dessus !";
+      return "Je peux t'aider sur : par quoi commencer, quels documents préparer, pourquoi c'est important, ou où vérifier les infos officielles. Pose une question là-dessus !";
     }
+  }
 
-    setFreeTextResponse(response);
+  // Obtenir réponse Capy (via API serveur)
+  async function getCapyResponse(userQuestion: string): Promise<string> {
+    try {
+      const response = await fetch("/api/capy-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: userQuestion,
+          demarches: demarches.map((d) => ({
+            id: d.id,
+            titre: d.titre,
+            description_simple: d.description_simple,
+            documents: d.documents,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+
+      const data = await response.json();
+      return data.response || getKeywordResponse(userQuestion);
+    } catch (error) {
+      console.warn("Capy API failed, using fallback", error);
+      return getKeywordResponse(userQuestion);
+    }
+  }
+
+  // Soumettre une question libre
+  async function handleFreeTextSubmit() {
+    if (!userInput.trim()) return;
+
+    const userQuestion = userInput.trim();
+
+    // Ajouter le message utilisateur immédiatement
+    setMessages((prev) => [...prev, { role: "user", text: userQuestion }]);
     setUserInput("");
+
+    // Générer la réponse (OpenAI ou fallback)
+    const response = await getCapyResponse(userQuestion);
+
+    // Ajouter la réponse Capy
+    setMessages((prev) => [...prev, { role: "capy", text: response }]);
   }
 
   return (
@@ -148,111 +174,93 @@ function CapyChatSection({ demarches }: { demarches: Demarche[] }) {
         </div>
       </div>
 
-      {/* Questions ou réponse */}
-      {freeTextResponse && activeQuestion === null ? (
-        // Mode : afficher réponse à question libre
-        <div className="capy-response">
-          <div className="capy-response-inner">
-            <span className="capy-response-avatar" aria-hidden="true">🦫</span>
-            <p className="capy-response-text">{freeTextResponse}</p>
-          </div>
-          <button
-            onClick={() => {
-              setFreeTextResponse("");
-              setUserInput("");
-            }}
-            className="capy-back-btn"
-          >
-            Poser une autre question
-          </button>
-        </div>
-      ) : activeQuestion === null ? (
-        // Mode : afficher boutons + champ texte
-        <>
-          <div className="capy-button-group">
-            {capyQuestions.map((q) => (
-              <button
-                key={q.id}
-                onClick={() => handleCapyQuestion(q.id)}
-                className="capy-btn"
-              >
-                {q.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Champ texte libre */}
-          <div style={{ marginTop: 12, borderTop: "1px solid #E0F2FE", paddingTop: 12 }}>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Pose une question..."
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleFreeTextSubmit()}
+      {/* Afficher l'historique des messages */}
+      {messages.length > 0 && (
+        <div style={{ marginBottom: 12, maxHeight: "200px", overflowY: "auto" }}>
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              style={{
+                marginBottom: 8,
+                display: "flex",
+                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+              }}
+            >
+              {msg.role === "capy" && (
+                <span style={{ fontSize: 16, marginRight: 6 }} aria-hidden="true">
+                  🦫
+                </span>
+              )}
+              <div
                 style={{
-                  flex: 1,
+                  maxWidth: "80%",
                   padding: "8px 12px",
-                  border: "1px solid #BFDBFE",
-                  borderRadius: 6,
+                  borderRadius: 8,
+                  background: msg.role === "user" ? "#DBEAFE" : "#F0F9FF",
+                  border: `1px solid ${msg.role === "user" ? "#BFDBFE" : "#E0F2FE"}`,
                   fontSize: 13,
-                  fontFamily: "inherit",
-                }}
-              />
-              <button
-                onClick={handleFreeTextSubmit}
-                style={{
-                  padding: "8px 12px",
-                  background: "var(--color-primary)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 6,
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: "pointer",
+                  lineHeight: 1.4,
                 }}
               >
-                Envoyer
-              </button>
+                {msg.text}
+              </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <div className="capy-response">
-          <div className="capy-response-inner">
-            <span className="capy-response-avatar" aria-hidden="true">🦫</span>
-            <p className="capy-response-text">
-              {capyLoading ? activeQuestion?.reponse : capyText}
-            </p>
-          </div>
-          {/* Attribution transparente */}
-          <p
-            style={{
-              fontSize: 11,
-              color: "var(--color-text-muted)",
-              marginTop: 6,
-              marginBottom: 8,
-              fontStyle: "italic",
-            }}
-          >
-            {capyTextSource === "llm"
-              ? "Reformulé par IA à partir de sources officielles"
-              : "Explication contrôlée à partir de sources officielles"}
-          </p>
-          <button
-            onClick={() => {
-              setActiveId(null);
-              setCapyText("");
-              setCapyTextSource("static");
-              setFreeTextResponse("");
-              setUserInput("");
-            }}
-            className="capy-back-btn"
-          >
-            Voir une autre question
-          </button>
+          ))}
         </div>
       )}
+
+      {/* Boutons rapides (toujours visibles) */}
+      {messages.length === 0 && (
+        <div className="capy-button-group">
+          {capyQuestions.map((q) => (
+            <button
+              key={q.id}
+              onClick={() => handleCapyQuestion(q.id)}
+              className="capy-btn"
+            >
+              {q.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Champ texte + bouton (toujours visibles) */}
+      <div style={{ marginTop: 12, borderTop: "1px solid #E0F2FE", paddingTop: 12 }}>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Pose une question..."
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleFreeTextSubmit()}
+            style={{
+              flex: 1,
+              padding: "8px 12px",
+              border: "1px solid #BFDBFE",
+              borderRadius: 6,
+              fontSize: 13,
+              fontFamily: "inherit",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => handleFreeTextSubmit()}
+            style={{
+              padding: "8px 12px",
+              background: "var(--color-primary)",
+              color: "white",
+              border: "none",
+              borderRadius: 6,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            Envoyer
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }
