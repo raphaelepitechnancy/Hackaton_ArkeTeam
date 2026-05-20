@@ -171,6 +171,9 @@ function CapyChatSection({ demarches }: { demarches: Demarche[] }) {
         <div>
           <p className="capy-title">Parle avec Capy</p>
           <p className="capy-subtitle">Tu veux que je t&apos;aide à comprendre ton parcours ?</p>
+          <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 4 }}>
+            🔒 Mode local sécurisé — pas de données envoyées
+          </p>
         </div>
       </div>
 
