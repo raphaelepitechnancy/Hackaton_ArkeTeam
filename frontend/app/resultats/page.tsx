@@ -11,6 +11,331 @@ import { getExplicationBloc } from "../../lib/explanation";
 import { simplifyWithLLM } from "../../lib/llm";
 import type { Demarche, QuestionnaireReponses } from "../../lib/types";
 
+/* ---- Document Analyzer Prototype ---- */
+function DocumentAnalyzerSection() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [result, setResult] = useState<{ title: string; message: string } | null>(null);
+  const fileInputRef = useState<HTMLInputElement>(null)[1];
+
+  function getDocumentResponse(filename: string): { title: string; message: string } {
+    const lower = filename.toLowerCase();
+
+    if (lower.includes("paie") || lower.includes("salary") || lower.includes("fiche")) {
+      return {
+        title: "Fiche de paie détectée",
+        message:
+          "Je peux t'aider à comprendre :\n• Salaire net (ce que tu reçois vraiment)\n• Cotisations sociales\n• Infos utiles pour CAF, bourse ou aide logement",
+      };
+    }
+
+    if (lower.includes("caf") || lower.includes("allocataire")) {
+      return {
+        title: "Document CAF détecté",
+        message:
+          "Contrôle bien :\n• Ton numéro allocataire\n• Les montants déclarés\n• Les justificatifs demandés",
+      };
+    }
+
+    if (lower.includes("ameli") || lower.includes("secu") || lower.includes("securite")) {
+      return {
+        title: "Document Sécu/Ameli détecté",
+        message:
+          "Vérifie :\n• Tes droits couverts\n• Les ayants droit déclarés\n• Les complémentaires disponibles",
+      };
+    }
+
+    if (lower.includes("impot") || lower.includes("tax")) {
+      return {
+        title: "Document fiscal détecté",
+        message:
+          "Je peux t'expliquer :\n• Tes obligations déclaratives\n• Crédits ou réductions d'impôts\n• Aides liées à ton revenu",
+      };
+    }
+
+    return {
+      title: "Document administratif détecté",
+      message: "Capy pourra bientôt t'aider à comprendre ce type de document en détail. Envoie-le et reviens en phase 2!",
+    };
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["application/pdf", "image/png", "image/jpeg"];
+    if (!validTypes.includes(file.type)) {
+      alert("Format non supporté. Utilise PDF, PNG ou JPG.");
+      return;
+    }
+
+    setSelectedFile(file);
+    setAnalyzing(true);
+    setResult(null);
+
+    // Simule une analyse locale pendant 1.5 secondes
+    setTimeout(() => {
+      const response = getDocumentResponse(file.name);
+      setResult(response);
+      setAnalyzing(false);
+    }, 1500);
+  }
+
+  function handleUploadClick() {
+    const input = document.getElementById("document-input") as HTMLInputElement;
+    input?.click();
+  }
+
+  return (
+    <section className="mb-8" style={{ marginTop: 24 }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%)",
+          border: "1px solid #F59E0B",
+          borderRadius: 16,
+          padding: 24,
+        }}
+      >
+        {/* En-tête */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 16,
+          }}
+        >
+          <span style={{ fontSize: 28 }} aria-hidden="true">
+            📄
+          </span>
+          <div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#1F2937" }}>
+              {selectedFile ? "Analyser un document" : "Envoie un document à Capy"}
+            </h3>
+            <p style={{ fontSize: 13, color: "#6B7280" }}>
+              Capy explique les documents, il ne les conserve pas.
+            </p>
+          </div>
+        </div>
+
+        {!selectedFile ? (
+          <>
+            {/* Description */}
+            <p
+              style={{
+                fontSize: 13,
+                color: "#374151",
+                lineHeight: 1.6,
+                marginBottom: 16,
+              }}
+            >
+              <strong>Exemples :</strong> bail, attestation CAF, courrier administratif, fiche de paie, bulletin Sécu.
+            </p>
+
+            {/* Bouton upload */}
+            <button
+              onClick={handleUploadClick}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                background: "rgba(255, 255, 255, 0.7)",
+                border: "2px dashed #D97706",
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#92400E",
+                cursor: "pointer",
+                marginBottom: 16,
+                transition: "all 0.2s",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.7)";
+              }}
+            >
+              📤 Sélectionner un document (PDF, PNG, JPG)
+            </button>
+
+            {/* Hidden input */}
+            <input
+              id="document-input"
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              onChange={handleFileSelect}
+              style={{ display: "none" }}
+            />
+
+            {/* Avertissement RGPD */}
+            <div
+              style={{
+                background: "rgba(239, 68, 68, 0.1)",
+                border: "1px solid #F87171",
+                borderRadius: 8,
+                padding: 12,
+              }}
+            >
+              <p style={{ fontSize: 11, color: "#991B1B", fontWeight: 500, lineHeight: 1.5 }}>
+                <strong>🔒 Respect de ta vie privée :</strong> Ne téléverse pas de document réel contenant des données
+                personnelles. Prototype de démonstration — aucune donnée n'est stockée.
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Fichier sélectionné */}
+            <div
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid #D97706",
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 16,
+              }}
+            >
+              <p style={{ fontSize: 12, fontWeight: 600, color: "#4B5563", marginBottom: 4 }}>
+                📋 {selectedFile.name}
+              </p>
+              <p style={{ fontSize: 11, color: "#6B7280" }}>
+                Taille : {(selectedFile.size / 1024).toFixed(1)} KB
+              </p>
+            </div>
+
+            {analyzing ? (
+              <>
+                {/* Loading simulé */}
+                <div
+                  style={{
+                    background: "rgba(255, 255, 255, 0.6)",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: 8,
+                    padding: 16,
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      animation: "spin 1s linear infinite",
+                      display: "inline-block",
+                      marginBottom: 8,
+                    }}
+                  >
+                    ⚙️
+                  </div>
+                  <p style={{ fontSize: 13, color: "#4B5563", fontWeight: 500 }}>
+                    Analyse locale simulée…
+                  </p>
+                  <p style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+                    Aucune donnée n'est envoyée
+                  </p>
+                </div>
+              </>
+            ) : result ? (
+              <>
+                {/* Résultat Capy */}
+                <div
+                  style={{
+                    background: "rgba(255, 255, 255, 0.8)",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: 8,
+                    padding: 12,
+                    marginBottom: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <span style={{ fontSize: 20, flexShrink: 0 }} aria-hidden="true">
+                      🦫
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#1F2937", marginBottom: 4 }}>
+                        {result.title}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "#4B5563",
+                          lineHeight: 1.5,
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {result.message}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bouton pour reset */}
+                <button
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setResult(null);
+                    const input = document.getElementById("document-input") as HTMLInputElement;
+                    if (input) input.value = "";
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    background: "rgba(255, 255, 255, 0.6)",
+                    border: "1px solid #D97706",
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#92400E",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.8)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.6)";
+                  }}
+                >
+                  Analyser un autre document
+                </button>
+              </>
+            ) : null}
+
+            {/* Avertissement RGPD */}
+            <div
+              style={{
+                background: "rgba(239, 68, 68, 0.1)",
+                border: "1px solid #F87171",
+                borderRadius: 8,
+                padding: 12,
+                marginTop: 16,
+              }}
+            >
+              <p style={{ fontSize: 11, color: "#991B1B", fontWeight: 500, lineHeight: 1.5 }}>
+                <strong>🔒 Prototype de démonstration :</strong> Aucune donnée n'est stockée, analysée ou envoyée. Ceci est une
+                simulation UX pour montrer le potentiel de phase 2.
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 /* ---- Bloc Capy ---- */
 const capyQuestions = [
   {
@@ -602,106 +927,7 @@ function ResultatsContenu() {
       {demarches.length > 0 && <CapyChatSection demarches={demarches} />}
 
       {/* ---- ANALYSER UN DOCUMENT ---- */}
-      {demarches.length > 0 && (
-        <section className="mb-8" style={{ marginTop: 24 }}>
-          <div
-            style={{
-              background: "linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%)",
-              border: "1px solid #F59E0B",
-              borderRadius: 16,
-              padding: 24,
-            }}
-          >
-            {/* En-tête */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 16,
-              }}
-            >
-              <span style={{ fontSize: 28 }} aria-hidden="true">
-                📄
-              </span>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: "#1F2937" }}>
-                  Bientôt : Envoie un document à Capy
-                </h3>
-                <p style={{ fontSize: 13, color: "#6B7280" }}>
-                  Capy explique les documents, il ne les conserve pas.
-                </p>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p
-              style={{
-                fontSize: 13,
-                color: "#374151",
-                lineHeight: 1.6,
-                marginBottom: 16,
-              }}
-            >
-              <strong>Exemples :</strong> bail, attestation CAF, courrier administratif, fiche de paie anonymisée.
-            </p>
-
-            {/* Bouton upload */}
-            <button
-              disabled
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                background: "rgba(255, 255, 255, 0.7)",
-                border: "2px dashed #D97706",
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#92400E",
-                cursor: "not-allowed",
-                opacity: 0.6,
-                marginBottom: 16,
-                transition: "all 0.2s",
-              }}
-            >
-              📤 Importer un document (phase 2)
-            </button>
-
-            {/* Exemple simulé */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.8)",
-                border: "1px solid #E5E7EB",
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            >
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#4B5563", marginBottom: 8 }}>
-                📋 Exemple simulé : Fiche de paie anonymisée
-              </p>
-              <p style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.5 }}>
-                <strong>Capy peut t'aider à comprendre :</strong> salaire net, cotisations sociales, déductions,
-                informations utiles pour une demande d'aide logement ou de bourse.
-              </p>
-            </div>
-
-            {/* Avertissement RGPD */}
-            <div
-              style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                border: "1px solid #F87171",
-                borderRadius: 8,
-                padding: 12,
-              }}
-            >
-              <p style={{ fontSize: 11, color: "#991B1B", fontWeight: 500, lineHeight: 1.5 }}>
-                <strong>🔒 Respect de ta vie privée :</strong> Ne téléverse pas de document réel contenant des données personnelles pendant cette démo. La fonction d'analyse complète sera disponible en phase 2 avec anonymisation locale.
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
+      {demarches.length > 0 && <DocumentAnalyzerSection />}
 
       {/* ---- AUCUN RÉSULTAT ---- */}
       {demarches.length === 0 && (
