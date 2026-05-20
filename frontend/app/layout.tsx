@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +16,6 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className="min-h-screen flex flex-col" style={{ background: "var(--color-bg)" }}>
-
         {/* HEADER */}
         <header
           style={{
@@ -24,7 +24,7 @@ export default function RootLayout({
           }}
           className="px-6 py-4 flex items-center justify-between"
         >
-          <a
+          <Link
             href="/"
             className="flex items-center gap-2 font-bold text-lg"
             style={{ color: "var(--color-primary)" }}
@@ -48,22 +48,19 @@ export default function RootLayout({
               C
             </span>
             CapAutonomie
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/sources"
             className="text-sm font-medium"
             style={{ color: "var(--color-text-soft)" }}
           >
             Transparence
-          </a>
+          </Link>
         </header>
 
         {/* CONTENU PRINCIPAL */}
-        <main
-          className="flex-1 w-full max-w-3xl mx-auto px-4 py-10"
-          style={{ maxWidth: 720 }}
-        >
+        <main className="flex-1 w-full">
           {children}
         </main>
 
@@ -78,16 +75,15 @@ export default function RootLayout({
           <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
             Données issues de sources officielles (Service-Public.fr, CAF.fr, Ameli.fr…){" "}
             <span style={{ color: "var(--color-border)" }}>—</span>{" "}
-            <a
+            <Link
               href="/sources"
               className="underline"
               style={{ color: "var(--color-text-soft)" }}
             >
               Voir les sources
-            </a>
+            </Link>
           </p>
         </footer>
-
       </body>
     </html>
   );

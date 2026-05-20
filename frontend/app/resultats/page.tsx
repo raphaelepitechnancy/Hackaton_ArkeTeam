@@ -16,7 +16,6 @@ function DocumentAnalyzerSection() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<{ title: string; message: string } | null>(null);
-  const fileInputRef = useState<HTMLInputElement>(null)[1];
 
   function getDocumentResponse(filename: string): { title: string; message: string } {
     const lower = filename.toLowerCase();

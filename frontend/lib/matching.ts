@@ -6,65 +6,79 @@ import { getProcedures } from "./db";
 // sans toucher au code de matching ci-dessous.
 const toutes = getProcedures() as Demarche[];
 
-// Config des filtres par besoin : quelles démarches afficher pour quel besoin
+// Strict filtering by need - each besoin has clear allowlist and exclusions
 function filterByNeed(
   procedures: Demarche[],
-  besoin: string
+  besoin: string,
+  statut: string,
+  logement: string
 ): Demarche[] {
-  const categorieMap: Record<string, string> = {
-    logement: "logement",
-    aides_financieres: "aides",
-    sante: "sante",
-    impots: "impots",
-    transport: "transport",
-  };
+  // Build the SET of allowed IDs based on besoin
+  const allowedIds = new Set<string>();
 
-  // Pas de filtrage par besoin si "je ne sais pas"
+  // "je ne sais pas" - return general recommendations per profile
   if (!besoin || besoin === "je_ne_sais_pas") {
-    return procedures;
+    if (statut === "etudiant") {
+      allowedIds.add("secu-ameli");
+      if (logement === "premier_appartement" || logement === "colocation") {
+        allowedIds.add("caf-apl");
+        allowedIds.add("assurance-habitation");
+        allowedIds.add("checklist-premier-appartement");
+      }
+      allowedIds.add("bourse-crous");
+      allowedIds.add("aide-transport-etudiant");
+    } else if (statut === "premier_emploi") {
+      allowedIds.add("impots-premier-emploi");
+      allowedIds.add("secu-ameli");
+      if (logement === "premier_appartement" || logement === "colocation") {
+        allowedIds.add("caf-apl");
+        allowedIds.add("assurance-habitation");
+      }
+    } else if (statut === "alternant") {
+      allowedIds.add("secu-ameli");
+      allowedIds.add("aide-transport-etudiant");
+      if (logement === "premier_appartement" || logement === "colocation") {
+        allowedIds.add("caf-apl");
+        allowedIds.add("assurance-habitation");
+      }
+    }
+  } else if (besoin === "logement") {
+    // STRICT logement: only housing-related
+    allowedIds.add("caf-apl");
+    allowedIds.add("assurance-habitation");
+    allowedIds.add("checklist-premier-appartement");
+  } else if (besoin === "aides_financieres") {
+    // STRICT aides: grants, CAF, transport
+    if (statut === "etudiant") {
+      allowedIds.add("bourse-crous");
+    }
+    // CAF only if housing situation requires it
+    if (logement === "premier_appartement" || logement === "colocation") {
+      allowedIds.add("caf-apl");
+    }
+    // Transport for students and alternants
+    if (statut === "etudiant" || statut === "alternant") {
+      allowedIds.add("aide-transport-etudiant");
+    }
+  } else if (besoin === "sante") {
+    // STRICT santé: ONLY health procedures
+    allowedIds.add("secu-ameli");
+    allowedIds.add("mutuelle-complementaire-sante");
+  } else if (besoin === "impots") {
+    // STRICT impots: ONLY tax procedures
+    allowedIds.add("impots-premier-emploi");
+  } else if (besoin === "transport") {
+    // STRICT transport: ONLY transport aid
+    allowedIds.add("aide-transport-etudiant");
   }
 
-  const catCible = categorieMap[besoin];
-  if (!catCible) return procedures;
-
-  // Règles strictes par besoin
-  const besoinConfig: Record<string, { primary: string[]; secondary: string[] }> =
-    {
-      logement: {
-        primary: ["caf-apl", "assurance-habitation", "checklist-premier-appartement"],
-        secondary: ["aide-transport-etudiant", "secu-ameli"],
-      },
-      sante: {
-        primary: ["secu-ameli", "mutuelle-complementaire-sante"],
-        secondary: ["bourse-crous"],
-      },
-      impots: {
-        primary: ["impots-premier-emploi"],
-        secondary: ["secu-ameli"],
-      },
-      transport: {
-        primary: ["aide-transport-etudiant"],
-        secondary: ["bourse-crous"],
-      },
-      aides: {
-        primary: ["caf-apl", "bourse-crous"],
-        secondary: ["mutuelle-complementaire-sante"],
-      },
-    };
-
-  const config = besoinConfig[catCible];
-  if (!config) return procedures;
-
-  // Filtrer uniquement les démarches pertinentes au besoin
-  // (primary ET secondary, quelque soit la priorité)
-  return procedures.filter(
-    (d) => config.primary.includes(d.id) || config.secondary.includes(d.id)
-  );
+  // Return ONLY procedures in allowedIds
+  return procedures.filter((d) => allowedIds.has(d.id));
 }
 
 /**
  * Retourne les démarches recommandées filtrées et triées par priorité puis par id.
- * Logique : filtrage par statut + logement + besoin (optionnel) + limite résultats.
+ * Logique STRICTE : besoin d'abord, puis affine par statut/logement.
  */
 export function getRecommendedProcedures(
   reponses: QuestionnaireReponses
@@ -81,41 +95,41 @@ export function getRecommendedProcedures(
 
   const statutKey = statutMap[statut] ?? statut;
 
-  // Filtrage de base : pour_qui contient le statut ou "tous"
-  let filtrées = toutes.filter(
+  // Step 1: Filtre par besoin d'abord (plus important que le statut)
+  let filtrées = filterByNeed(toutes, besoin, statutKey, logement);
+
+  // Step 2: Filtrer par statut SEULEMENT si le besoin le permet
+  filtrées = filtrées.filter(
     (d) => d.pour_qui.includes(statutKey) || d.pour_qui.includes("tous")
   );
 
-  // Règles spécifiques logement
-  if (logement === "chez_parents") {
-    // Pas en appartement : on retire les démarches de premier appartement
-    filtrées = filtrées.filter(
-      (d) =>
-        d.id !== "caf-apl" &&
-        d.id !== "assurance-habitation" &&
-        d.id !== "checklist-premier-appartement"
-    );
-  }
+  // Step 3: Règles spécifiques logement SEULEMENT si besoin = logement
+  if (besoin === "logement") {
+    if (logement === "chez_parents") {
+      // Pas en appartement : retire les démarches de premier appartement
+      filtrées = filtrées.filter(
+        (d) =>
+          d.id !== "caf-apl" &&
+          d.id !== "assurance-habitation" &&
+          d.id !== "checklist-premier-appartement"
+      );
+    }
 
-  if (logement === "premier_appartement" || logement === "colocation") {
-    // S'assurer que les démarches logement critiques sont incluses
-    const ids_logement = [
-      "caf-apl",
-      "assurance-habitation",
-      "checklist-premier-appartement",
-    ];
-    ids_logement.forEach((id) => {
-      const already = filtrées.find((d) => d.id === id);
-      if (!already) {
-        const demarche = toutes.find((d) => d.id === id);
-        if (demarche) filtrées.push(demarche);
-      }
-    });
-  }
-
-  // Filtrage stricte par besoin si précisé
-  if (besoin && besoin !== "je_ne_sais_pas") {
-    filtrées = filterByNeed(filtrées, besoin);
+    if (logement === "premier_appartement" || logement === "colocation") {
+      // S'assurer que les démarches logement critiques sont incluses
+      const ids_logement = [
+        "caf-apl",
+        "assurance-habitation",
+        "checklist-premier-appartement",
+      ];
+      ids_logement.forEach((id) => {
+        const already = filtrées.find((d) => d.id === id);
+        if (!already) {
+          const demarche = toutes.find((d) => d.id === id);
+          if (demarche) filtrées.push(demarche);
+        }
+      });
+    }
   }
 
   // Déduplique par id

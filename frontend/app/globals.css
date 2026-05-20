@@ -45,10 +45,11 @@ html {
 }
 
 body {
-  background-color: var(--color-bg);
+  background: linear-gradient(135deg, #f0f9ff 0%, #f9fafb 50%, #fef3c7 100%);
   color: var(--color-text-body);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
+  min-height: 100vh;
 }
 
 /* Focus visible accessible — outline bleu propre */
@@ -78,23 +79,24 @@ button, a {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1D4ED8 100%);
   color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 12px 24px;
-  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   letter-spacing: 0.01em;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
 }
 .btn-primary:hover {
-  background-color: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #1D4ED8 0%, #1e40af 100%);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
 }
 .btn-primary:disabled {
-  background-color: #D1D5DB;
+  background: #D1D5DB;
   color: #9CA3AF;
   cursor: not-allowed;
   transform: none;
@@ -123,44 +125,57 @@ button, a {
 /* --- Carte démarche --- */
 .card-demarche {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  border: 1.5px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+}
+.card-demarche:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
 }
 .card-demarche.priorite-1 {
   border-color: var(--color-p1-border);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.10);
+  background: linear-gradient(135deg, #fff 0%, #f0fdf4 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+}
+.card-demarche.priorite-1:hover {
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
 }
 .card-demarche.priorite-2 {
   border-color: var(--color-p2-border);
+  background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
 }
 
 /* --- Badge priorité --- */
 .badge {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 5px 14px;
+  border-radius: 24px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 .badge-p1 {
-  background-color: var(--color-p1);
+  background: linear-gradient(135deg, var(--color-p1) 0%, #059669 100%);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 .badge-p2 {
-  background-color: var(--color-p2-light);
-  color: var(--color-p2-dark);
-  border: 1px solid var(--color-p2-border);
+  background: linear-gradient(135deg, var(--color-p2) 0%, #d97706 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 .badge-p3 {
-  background-color: var(--color-border-soft);
-  color: var(--color-text-soft);
+  background-color: #e5e7eb;
+  color: #6b7280;
 }
 
 /* --- Barre de progression questionnaire --- */
@@ -181,42 +196,48 @@ button, a {
 .option-card {
   width: 100%;
   text-align: left;
-  padding: 14px 18px;
+  padding: 16px 20px;
   border-radius: 12px;
   border: 2px solid var(--color-border);
-  background-color: var(--color-surface);
+  background: linear-gradient(135deg, var(--color-surface) 0%, #f9fafb 100%);
   color: var(--color-text-body);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 .option-card:hover {
   border-color: #93C5FD;
   background-color: var(--color-primary-light);
   color: var(--color-primary-dark);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
 }
 .option-card.selected {
   border-color: var(--color-primary);
-  background-color: var(--color-primary-light);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, #e0f2fe 100%);
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
 }
 
 /* --- Input texte --- */
 .input-text {
   width: 100%;
   border: 2px solid var(--color-border);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 14px 18px;
   font-size: 15px;
   color: var(--color-text-strong);
-  background-color: var(--color-surface);
+  background: linear-gradient(135deg, var(--color-surface) 0%, #f9fafb 100%);
   font-family: inherit;
+  transition: all 0.3s ease;
 }
 .input-text:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  background-color: var(--color-surface);
 }
 .input-text::placeholder {
   color: var(--color-text-muted);
@@ -224,57 +245,69 @@ button, a {
 
 /* --- Encart explication / alerte douce --- */
 .encart-explication {
-  background-color: var(--color-primary-light);
-  border: 1px solid #BFDBFE;
-  border-radius: 10px;
-  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, #e0f2fe 100%);
+  border: 1.5px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 16px;
   font-size: 14px;
   color: #1E40AF;
-  line-height: 1.6;
+  line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
 }
 .encart-limite {
-  background-color: var(--color-p2-light);
-  border: 1px solid var(--color-p2-border);
+  background: linear-gradient(135deg, var(--color-p2-light) 0%, #fefce8 100%);
+  border: 1.5px solid var(--color-p2-border);
   border-radius: 12px;
   padding: 20px;
   font-size: 14px;
   color: #92400E;
-  line-height: 1.6;
+  line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
 }
 
 /* --- Bloc Capy Chat --- */
 .capy-chat-section {
-  background-color: #EFF6FF;
-  border: 1px solid #BFDBFE;
-  border-radius: 14px;
-  padding: 22px 20px;
+  background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+  border: 1.5px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 24px;
   margin-bottom: 32px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
 }
 
 .capy-header {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(37, 99, 235, 0.2);
 }
 
 .capy-avatar {
-  font-size: 28px;
+  font-size: 32px;
   line-height: 1;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.7);
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .capy-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-text-strong);
-  margin-bottom: 2px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: 4px;
 }
 
 .capy-subtitle {
   font-size: 14px;
   color: var(--color-text-soft);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .capy-button-group {
@@ -287,21 +320,24 @@ button, a {
   display: block;
   width: 100%;
   text-align: left;
-  background-color: #fff;
+  background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
   color: var(--color-primary);
   font-size: 14px;
-  font-weight: 600;
-  padding: 11px 16px;
+  font-weight: 700;
+  padding: 13px 18px;
   border-radius: 10px;
   border: 1.5px solid #BFDBFE;
   cursor: pointer;
   font-family: inherit;
-  line-height: 1.4;
+  line-height: 1.5;
+  transition: all 0.3s ease;
 }
 
 .capy-btn:hover {
   background-color: var(--color-primary-light);
   border-color: var(--color-primary);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
 .capy-response {
@@ -314,23 +350,31 @@ button, a {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background-color: #fff;
-  border: 1px solid #BFDBFE;
-  border-radius: 10px;
-  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+  border: 1.5px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
 }
 
 .capy-response-avatar {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .capy-response-text {
   font-size: 14px;
   color: var(--color-text-body);
-  line-height: 1.65;
+  line-height: 1.7;
 }
 
 .capy-back-btn {
