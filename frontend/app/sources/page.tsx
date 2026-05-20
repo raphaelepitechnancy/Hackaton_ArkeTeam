@@ -1,153 +1,271 @@
-import demarchesData from "../../data/demarches.json";
+import { getSources, getSourcesMeta } from "../../lib/db";
 
-const { page_sources } = demarchesData;
+const sources_list = getSources();
+const page_sources_meta = getSourcesMeta();
+
+function IconArrow() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <path d="M2.5 7h9M8 3.5L11.5 7 8 10.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function SourcesPage() {
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
-        Transparence & Sources
-      </h1>
-      <p className="text-gray-500 mb-10">
-        Ce que cette application fait, comment elle le fait, et ce qu'elle ne
-        fait pas.
-      </p>
+    <div style={{ maxWidth: 640, margin: "0 auto" }}>
 
-      {/* Question 1 : D'ou viennent les donnees ? */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0">
-            1
-          </span>
-          D'ou viennent les donnees ?
-        </h2>
-        <p className="text-gray-600 mb-5">
-          {page_sources.description} Voici les sources utilisees :
+      {/* ---- EN-TÊTE ---- */}
+      <div className="mb-10">
+        <h1
+          className="font-extrabold mb-3"
+          style={{
+            fontSize: "clamp(24px, 4vw, 34px)",
+            color: "var(--color-text-strong)",
+            letterSpacing: "-0.015em",
+          }}
+        >
+          Transparence &amp; Sources
+        </h1>
+        <p style={{ fontSize: 16, color: "var(--color-text-soft)", lineHeight: 1.6, maxWidth: 500 }}>
+          Ce que cette application fait, comment elle le fait,
+          et ce qu'elle ne fait pas.
         </p>
+      </div>
+
+      {/* ---- SECTION 1 : D'où viennent les données ? ---- */}
+      <section className="mb-10">
+        <h2
+          className="font-bold mb-5 flex items-center gap-3"
+          style={{ fontSize: 19, color: "var(--color-text-strong)" }}
+        >
+          <span className="numero-section">1</span>
+          D'où viennent les données ?
+        </h2>
+
+        <p
+          className="mb-5"
+          style={{ fontSize: 15, color: "var(--color-text-body)", lineHeight: 1.65 }}
+        >
+          {page_sources_meta.description}
+        </p>
+
         <div className="flex flex-col gap-4">
-          {page_sources.sources.map((source) => (
+          {sources_list.map((source) => (
             <div
               key={source.nom}
-              className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm"
+              style={{
+                background: "var(--color-surface)",
+                border: "1px solid var(--color-border)",
+                borderRadius: 14,
+                padding: "20px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
             >
               <div className="flex items-start justify-between gap-3 mb-2">
-                <h3 className="font-bold text-gray-900">{source.nom}</h3>
+                <h3
+                  className="font-bold"
+                  style={{ fontSize: 15, color: "var(--color-text-strong)" }}
+                >
+                  {source.nom}
+                </h3>
                 <a
                   href={source.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium underline flex-shrink-0"
+                  className="flex items-center gap-1.5"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--color-primary)",
+                    flexShrink: 0,
+                  }}
                 >
                   Visiter
+                  <IconArrow />
                 </a>
               </div>
-              <p className="text-gray-600 text-sm mb-3">{source.description}</p>
-              <p className="text-xs text-gray-400">
-                Couvre :{" "}
+
+              <p
+                className="mb-3"
+                style={{ fontSize: 13, color: "var(--color-text-soft)", lineHeight: 1.6 }}
+              >
+                {source.description}
+              </p>
+
+              <div className="flex flex-wrap gap-1">
                 {source.demarches_couvertes.map((id) => (
                   <span
                     key={id}
-                    className="inline-block bg-gray-100 text-gray-600 rounded px-1.5 py-0.5 mr-1 mb-1"
+                    style={{
+                      display: "inline-block",
+                      fontSize: 11,
+                      fontWeight: 500,
+                      background: "var(--color-bg)",
+                      color: "var(--color-text-soft)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: 6,
+                      padding: "2px 8px",
+                    }}
                   >
                     {id}
                   </span>
                 ))}
-              </p>
+              </div>
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-400 mt-3">
-          Verifie le : {page_sources.date_verification} — {page_sources.note}
+
+        <p
+          className="mt-4"
+          style={{ fontSize: 12, color: "var(--color-text-muted)" }}
+        >
+          Vérifié le : {page_sources_meta.date_verification} — {page_sources_meta.note}
         </p>
       </section>
 
-      {/* Question 2 : Comment fonctionne le matching ? */}
+      {/* ---- SECTION 2 : Comment fonctionne le matching ? ---- */}
       <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0">
-            2
-          </span>
+        <h2
+          className="font-bold mb-5 flex items-center gap-3"
+          style={{ fontSize: 19, color: "var(--color-text-strong)" }}
+        >
+          <span className="numero-section">2</span>
           Comment fonctionne le matching ?
         </h2>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm text-sm text-gray-700 space-y-3">
-          <p>
-            Le matching est une logique de filtrage statique basee sur tes
-            reponses au questionnaire. Il n'y a ni intelligence artificielle,
-            ni algorithme complexe.
-          </p>
-          <p>
-            <strong>Etape 1 — Filtrage par statut :</strong> chaque demarche a
-            une liste "pour_qui" (etudiant, alternant, premier_emploi,
-            etudiant_etranger). On garde uniquement les demarches qui
-            correspondent a ton statut.
-          </p>
-          <p>
-            <strong>Etape 2 — Ajustement par logement :</strong> si tu es
-            encore chez tes parents, on retire les demarches liees au premier
-            appartement (APL, assurance habitation, checklist). Si tu
-            emmenages, on s'assure qu'elles apparaissent.
-          </p>
-          <p>
-            <strong>Etape 3 — Filtrage par besoin :</strong> si tu as un
-            besoin prioritaire (sante, transport, etc.), on garde toutes les
-            demarches P1 et on filtre les P2/P3 vers ta categorie d'interet.
-          </p>
-          <p>
-            <strong>Etape 4 — Tri :</strong> les demarches sont toujours
-            affichees par priorite (P1 en rouge en premier, P2 ensuite),
-            l'ordre est fixe et ne depend pas de l'utilisateur.
-          </p>
+
+        <div
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: 14,
+            padding: "22px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          }}
+        >
+          {[
+            {
+              label: "Filtrage par statut",
+              texte:
+                "Chaque démarche a une liste «pour qui» (étudiant, alternant…). On garde uniquement celles qui correspondent à ta situation.",
+            },
+            {
+              label: "Ajustement par logement",
+              texte:
+                "Si tu es encore chez tes parents, on retire les démarches liées au premier appartement (APL, assurance…). Si tu emménages, on s'assure qu'elles apparaissent.",
+            },
+            {
+              label: "Filtrage par besoin",
+              texte:
+                "Si tu as un besoin prioritaire (santé, transport…), on garde toutes les démarches P1 et on filtre les P2/P3 vers ta catégorie.",
+            },
+            {
+              label: "Tri final",
+              texte:
+                "Les démarches sont toujours affichées par priorité (P1 en vert en premier, P2 ensuite). L'ordre est fixe.",
+            },
+          ].map((etape, i) => (
+            <div
+              key={i}
+              className="flex gap-4"
+              style={{
+                paddingBottom: i < 3 ? "16px" : 0,
+                marginBottom: i < 3 ? "16px" : 0,
+                borderBottom: i < 3 ? "1px solid var(--color-border-soft)" : "none",
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: "50%",
+                  background: "var(--color-primary-light)",
+                  color: "var(--color-primary)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  marginTop: 1,
+                }}
+              >
+                {i + 1}
+              </span>
+              <div>
+                <p
+                  className="font-semibold mb-1"
+                  style={{ fontSize: 14, color: "var(--color-text-strong)" }}
+                >
+                  {etape.label}
+                </p>
+                <p style={{ fontSize: 13, color: "var(--color-text-soft)", lineHeight: 1.6 }}>
+                  {etape.texte}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Question 3 : Limites */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0">
-            3
-          </span>
+      {/* ---- SECTION 3 : Limites ---- */}
+      <section className="mb-12">
+        <h2
+          className="font-bold mb-5 flex items-center gap-3"
+          style={{ fontSize: 19, color: "var(--color-text-strong)" }}
+        >
+          <span className="numero-section">3</span>
           Quelles sont les limites ?
         </h2>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-900 space-y-3">
-          <p className="font-semibold">Ce que CapAutonomie ne fait PAS :</p>
-          <ul className="space-y-2 list-disc list-inside">
-            <li>
-              L'application ne verifie pas ton eligibilite reelle a une aide —
-              les conditions officielles peuvent changer.
-            </li>
-            <li>
-              Elle ne couvre pas toutes les situations (ex : handicap,
-              situations familiales complexes, cas speciaux).
-            </li>
-            <li>
-              Elle ne remplace pas les conseils d'un assistant social, d'un
-              CROUS ou d'un conseiller CAF.
-            </li>
-            <li>
-              La ville que tu renseignes n'est pas encore utilisee pour filtrer
-              des aides locales (fonctionnalite a venir).
-            </li>
-            <li>
-              Les montants (ex : "jusqu'a 300€/mois d'APL") sont des
-              estimations — le montant reel depend de ta situation precise.
-            </li>
+
+        <div className="encart-limite">
+          <p
+            className="font-bold mb-4"
+            style={{ fontSize: 14, color: "#92400E" }}
+          >
+            Ce que CapAutonomie ne fait PAS :
+          </p>
+          <ul className="flex flex-col gap-3">
+            {[
+              "L'application ne vérifie pas ton éligibilité réelle à une aide — les conditions officielles peuvent changer.",
+              "Elle ne couvre pas toutes les situations (ex : handicap, situations familiales complexes, cas spéciaux).",
+              "Elle ne remplace pas les conseils d'un assistant social, d'un CROUS ou d'un conseiller CAF.",
+              "La ville que tu renseignes n'est pas encore utilisée pour filtrer des aides locales (fonctionnalité à venir).",
+              "Les montants (ex : «jusqu'à 300 €/mois d'APL») sont des estimations — le montant réel dépend de ta situation précise.",
+            ].map((item, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2"
+                style={{ fontSize: 13, lineHeight: 1.6 }}
+              >
+                <span style={{ flexShrink: 0, marginTop: 3 }}>•</span>
+                {item}
+              </li>
+            ))}
           </ul>
-          <p className="font-semibold mt-4">
-            Toujours verifier sur le site officiel de l'organisme avant de faire
-            une demarche.
+          <p
+            className="font-bold mt-5"
+            style={{ fontSize: 13, color: "#78350F" }}
+          >
+            Toujours vérifier sur le site officiel de l'organisme avant de faire une démarche.
           </p>
         </div>
       </section>
 
-      {/* CTA retour */}
-      <div className="text-center pt-4">
+      {/* ---- CTA RETOUR ---- */}
+      <div className="text-center">
         <a
           href="/questionnaire"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl transition-colors"
+          className="btn-primary"
+          style={{ fontSize: 15, padding: "13px 30px" }}
         >
           Faire le questionnaire
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2.5 7h9M8 3.5L11.5 7 8 10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </a>
       </div>
+
     </div>
   );
 }

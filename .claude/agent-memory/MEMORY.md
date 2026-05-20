@@ -1,0 +1,5 @@
+- [Projet CapAutonomie](data/project_capautonomie.md) — Hackathon démarches admin jeunes adultes, fichier data/demarches.json, BLOC 1 livré
+- [Design system CapAutonomie](designeuxui/project_capautonomie.md) — palette Bleu+Vert, variables CSS, classes custom globals.css, stack Next.js 16 + Tailwind v4
+- [Feedback design](designeuxui/feedback_design.md) — variables CSS > Tailwind couleur, SVG inline, ordre @import dans globals.css
+- [Responsable IA — projet CapAutonomie](respoia/project_capautonomie.md) — explanation.ts, stratégie statique, composant CarteDemarche, deadline BLOC 2
+- [IA responsable — principes](respoia/feedback_ia_responsable.md) — citer source officielle, fallback statique, anti-hallucination

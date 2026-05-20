@@ -1,0 +1,1 @@
+- [Projet CapAutonomie](project_capautonomie.md) — hackathon 1 journée, app web 18-25 ans, 5 démarches admin, démo fin de journée 2026-05-20, grille éval 60/20/20

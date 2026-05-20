@@ -1,0 +1,1 @@
+- [Projet CapAutonomie](project_capautonomie.md) — Architecture Next.js 16, structure pages F1-F4, navigation par query params, matching statique

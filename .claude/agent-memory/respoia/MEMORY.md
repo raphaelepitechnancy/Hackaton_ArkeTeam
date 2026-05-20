@@ -1,0 +1,1 @@
+- [Architecture data CapAutonomie](project_capautonomie_arch.md) — couche lib/db.ts créée, seul point d'entrée vers demarches.json, 4 fonctions publiques exposées

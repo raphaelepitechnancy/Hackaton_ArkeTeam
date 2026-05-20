@@ -1,7 +1,10 @@
 import type { Demarche, QuestionnaireReponses } from "./types";
-import demarchesData from "../data/demarches.json";
+import { getProcedures } from "./db";
 
-const toutes = demarchesData.demarches as Demarche[];
+// Toutes les démarches chargées via la couche data (lib/db.ts).
+// En production : remplacer getProcedures() par un appel base de données
+// sans toucher au code de matching ci-dessous.
+const toutes = getProcedures() as Demarche[];
 
 /**
  * Retourne les démarches recommandées filtrées et triées par priorité puis par id.
