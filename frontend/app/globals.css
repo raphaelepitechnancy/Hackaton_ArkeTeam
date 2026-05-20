@@ -242,6 +242,115 @@ button, a {
   line-height: 1.6;
 }
 
+/* --- Bloc Capy Chat --- */
+.capy-chat-section {
+  background-color: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+  padding: 22px 20px;
+  margin-bottom: 32px;
+}
+
+.capy-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.capy-avatar {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.capy-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  margin-bottom: 2px;
+}
+
+.capy-subtitle {
+  font-size: 14px;
+  color: var(--color-text-soft);
+  line-height: 1.4;
+}
+
+.capy-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.capy-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background-color: #fff;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #BFDBFE;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.capy-btn:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.capy-response {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.capy-response-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #fff;
+  border: 1px solid #BFDBFE;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.capy-response-avatar {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.capy-response-text {
+  font-size: 14px;
+  color: var(--color-text-body);
+  line-height: 1.65;
+}
+
+.capy-back-btn {
+  align-self: flex-start;
+  background-color: transparent;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #BFDBFE;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.capy-back-btn:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
 /* --- Section numero (Sources) --- */
 .numero-section {
   width: 28px;

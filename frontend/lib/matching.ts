@@ -6,9 +6,65 @@ import { getProcedures } from "./db";
 // sans toucher au code de matching ci-dessous.
 const toutes = getProcedures() as Demarche[];
 
+// Config des filtres par besoin : quelles démarches afficher pour quel besoin
+function filterByNeed(
+  procedures: Demarche[],
+  besoin: string
+): Demarche[] {
+  const categorieMap: Record<string, string> = {
+    logement: "logement",
+    aides_financieres: "aides",
+    sante: "sante",
+    impots: "impots",
+    transport: "transport",
+  };
+
+  // Pas de filtrage par besoin si "je ne sais pas"
+  if (!besoin || besoin === "je_ne_sais_pas") {
+    return procedures;
+  }
+
+  const catCible = categorieMap[besoin];
+  if (!catCible) return procedures;
+
+  // Règles strictes par besoin
+  const besoinConfig: Record<string, { primary: string[]; secondary: string[] }> =
+    {
+      logement: {
+        primary: ["caf-apl", "assurance-habitation", "checklist-premier-appartement"],
+        secondary: ["aide-transport-etudiant", "secu-ameli"],
+      },
+      sante: {
+        primary: ["secu-ameli", "mutuelle-complementaire-sante"],
+        secondary: ["bourse-crous"],
+      },
+      impots: {
+        primary: ["impots-premier-emploi"],
+        secondary: ["secu-ameli"],
+      },
+      transport: {
+        primary: ["aide-transport-etudiant"],
+        secondary: ["bourse-crous"],
+      },
+      aides: {
+        primary: ["caf-apl", "bourse-crous"],
+        secondary: ["mutuelle-complementaire-sante"],
+      },
+    };
+
+  const config = besoinConfig[catCible];
+  if (!config) return procedures;
+
+  // Filtrer uniquement les démarches pertinentes au besoin
+  // (primary ET secondary, quelque soit la priorité)
+  return procedures.filter(
+    (d) => config.primary.includes(d.id) || config.secondary.includes(d.id)
+  );
+}
+
 /**
  * Retourne les démarches recommandées filtrées et triées par priorité puis par id.
- * Logique : filtrage par statut + logement + besoin (optionnel).
+ * Logique : filtrage par statut + logement + besoin (optionnel) + limite résultats.
  */
 export function getRecommendedProcedures(
   reponses: QuestionnaireReponses
@@ -42,7 +98,7 @@ export function getRecommendedProcedures(
   }
 
   if (logement === "premier_appartement" || logement === "colocation") {
-    // S'assurer que les démarches logement sont incluses
+    // S'assurer que les démarches logement critiques sont incluses
     const ids_logement = [
       "caf-apl",
       "assurance-habitation",
@@ -57,21 +113,9 @@ export function getRecommendedProcedures(
     });
   }
 
-  // Filtrage par besoin principal si précisé
-  const categorieMap: Record<string, string> = {
-    logement: "logement",
-    aides_financieres: "aides",
-    sante: "sante",
-    impots: "impots",
-    transport: "transport",
-  };
-
-  if (besoin && besoin !== "je_ne_sais_pas" && categorieMap[besoin]) {
-    const catCible = categorieMap[besoin];
-    // On garde toujours les P1, et on filtre davantage les P2/P3 par catégorie
-    filtrées = filtrées.filter(
-      (d) => d.priorite === 1 || d.categorie === catCible
-    );
+  // Filtrage stricte par besoin si précisé
+  if (besoin && besoin !== "je_ne_sais_pas") {
+    filtrées = filterByNeed(filtrées, besoin);
   }
 
   // Déduplique par id
@@ -88,7 +132,11 @@ export function getRecommendedProcedures(
     return a.id.localeCompare(b.id);
   });
 
-  return unique;
+  // LIMITE : max 4 P1 + 2 P2 pour éviter l'overload
+  const p1 = unique.filter((d) => d.priorite === 1).slice(0, 4);
+  const p2 = unique.filter((d) => d.priorite > 1).slice(0, 2);
+
+  return [...p1, ...p2];
 }
 
 /**

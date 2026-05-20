@@ -8,7 +8,254 @@ import {
   getPersonaLabel,
 } from "../../lib/matching";
 import { getExplicationBloc } from "../../lib/explanation";
+import { simplifyWithLLM } from "../../lib/llm";
 import type { Demarche, QuestionnaireReponses } from "../../lib/types";
+
+/* ---- Bloc Capy ---- */
+const capyQuestions = [
+  {
+    id: "commencement",
+    label: "Par quoi je commence ?",
+    reponse:
+      "Commence par les démarches marquées en vert (priorité 1). Elles sont les plus urgentes et souvent les plus rapides. Ouvre la première, clique sur le lien officiel, et tu vas pas à pas.",
+  },
+  {
+    id: "documents",
+    label: "Quels documents préparer ?",
+    reponse:
+      "Regroupe les documents demandés par chaque démarche (tu vois la liste sous chaque titre). Demande à ta famille ce que tu n'as pas. Les documents manquent rarement, et le site officiel peut te dire comment les obtenir si tu es bloqué.",
+  },
+  {
+    id: "importance",
+    label: "Pourquoi cette démarche est importante ?",
+    reponse:
+      "Chaque démarche te protège ou t'aide financièrement. Par exemple, la CAF te verse de l'argent pour le loyer. La Sécu te couvre en cas de problème de santé. C'est pas optionnel, c'est vital.",
+  },
+  {
+    id: "sources",
+    label: "Où vérifier l'information officielle ?",
+    reponse:
+      "Clique sur le bouton \"Lien officiel\" de chaque démarche. C'est la source directe du gouvernement, le plus fiable possible. Tu peux aussi aller à la page Sources en bas pour voir d'où viennent toutes les infos.",
+  },
+];
+
+function CapyChatSection({ demarches }: { demarches: Demarche[] }) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [capyText, setCapyText] = useState<string>("");
+  const [capyTextSource, setCapyTextSource] = useState<"llm" | "static">("static");
+  const [capyLoading, setCapyLoading] = useState(false);
+  const [userInput, setUserInput] = useState<string>("");
+  const [freeTextResponse, setFreeTextResponse] = useState<string>("");
+
+  function handleCapyQuestion(questionId: string) {
+    const question = capyQuestions.find((q) => q.id === questionId);
+    if (!question) return;
+
+    setActiveId(questionId);
+    setCapyText(question.reponse); // texte statique immédiat
+    setCapyTextSource("static");
+    setCapyLoading(true);
+
+    simplifyWithLLM(
+      {
+        titre: "Conseil Capy",
+        description_simple: question.reponse,
+        pour_qui: [],
+        documents: [],
+        source: "CapAutonomie",
+      },
+      question.reponse
+    ).then((result) => {
+      setCapyText(result.text);
+      setCapyTextSource(result.source);
+      setCapyLoading(false);
+    });
+  }
+
+  const activeQuestion = capyQuestions.find((q) => q.id === activeId) ?? null;
+
+  // Keyword matching pour les questions libres
+  function handleFreeTextSubmit() {
+    if (!userInput.trim()) return;
+
+    const input = userInput.toLowerCase();
+    let response = "";
+
+    if (
+      input.includes("commence") ||
+      input.includes("début") ||
+      input.includes("priorité") ||
+      input.includes("urgence")
+    ) {
+      const p1 = demarches.filter((d) => d.priorite === 1);
+      if (p1.length > 0) {
+        response = `Commence par celles en vert : ${p1.map((d) => d.titre).join(", ")}. Ce sont les plus urgentes.`;
+      } else {
+        response = "Commence par les démarches en haut de la liste.";
+      }
+    } else if (
+      input.includes("document") ||
+      input.includes("papier") ||
+      input.includes("justificatif")
+    ) {
+      const allDocs = demarches
+        .filter((d) => d.documents.length > 0)
+        .flatMap((d) => d.documents.slice(0, 2));
+      const uniqueDocs = [...new Set(allDocs)];
+      if (uniqueDocs.length > 0) {
+        response = `Documents à préparer : ${uniqueDocs.slice(0, 5).join(", ")}. Demande à ta famille ce que tu n'as pas.`;
+      } else {
+        response = "Regroupe les documents listés sous chaque démarche.";
+      }
+    } else if (
+      input.includes("pourquoi") ||
+      input.includes("important") ||
+      input.includes("obligatoire")
+    ) {
+      response =
+        "Chaque démarche te protège ou t'aide financièrement. Par exemple, la CAF te verse de l'argent pour le loyer. La Sécu te couvre en cas de problème. C'est pas optionnel, c'est vital.";
+    } else if (
+      input.includes("source") ||
+      input.includes("officiel") ||
+      input.includes("vérifier")
+    ) {
+      response =
+        "Clique sur les boutons 'Lien officiel' de chaque démarche. C'est la source directe du gouvernement, le plus fiable. Tu peux aussi voir la page Sources pour d'où vient tout.";
+    } else if (
+      input.includes("upload") ||
+      input.includes("fichier") ||
+      input.includes("envoyer document")
+    ) {
+      response =
+        "Bientôt tu pourras envoyer tes documents directement ici. Pour maintenant, suis les liens officiels.";
+    } else {
+      response =
+        "Je peux t'aider sur : par quoi commencer, quels documents préparer, pourquoi c'est important, ou où vérifier les infos officielles. Pose une question là-dessus !";
+    }
+
+    setFreeTextResponse(response);
+    setUserInput("");
+  }
+
+  return (
+    <div className="capy-chat-section">
+      {/* En-tête */}
+      <div className="capy-header">
+        <span className="capy-avatar" aria-hidden="true">🦫</span>
+        <div>
+          <p className="capy-title">Parle avec Capy</p>
+          <p className="capy-subtitle">Tu veux que je t&apos;aide à comprendre ton parcours ?</p>
+        </div>
+      </div>
+
+      {/* Questions ou réponse */}
+      {freeTextResponse && activeQuestion === null ? (
+        // Mode : afficher réponse à question libre
+        <div className="capy-response">
+          <div className="capy-response-inner">
+            <span className="capy-response-avatar" aria-hidden="true">🦫</span>
+            <p className="capy-response-text">{freeTextResponse}</p>
+          </div>
+          <button
+            onClick={() => {
+              setFreeTextResponse("");
+              setUserInput("");
+            }}
+            className="capy-back-btn"
+          >
+            Poser une autre question
+          </button>
+        </div>
+      ) : activeQuestion === null ? (
+        // Mode : afficher boutons + champ texte
+        <>
+          <div className="capy-button-group">
+            {capyQuestions.map((q) => (
+              <button
+                key={q.id}
+                onClick={() => handleCapyQuestion(q.id)}
+                className="capy-btn"
+              >
+                {q.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Champ texte libre */}
+          <div style={{ marginTop: 12, borderTop: "1px solid #E0F2FE", paddingTop: 12 }}>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Pose une question..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleFreeTextSubmit()}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  border: "1px solid #BFDBFE",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontFamily: "inherit",
+                }}
+              />
+              <button
+                onClick={handleFreeTextSubmit}
+                style={{
+                  padding: "8px 12px",
+                  background: "var(--color-primary)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Envoyer
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="capy-response">
+          <div className="capy-response-inner">
+            <span className="capy-response-avatar" aria-hidden="true">🦫</span>
+            <p className="capy-response-text">
+              {capyLoading ? activeQuestion?.reponse : capyText}
+            </p>
+          </div>
+          {/* Attribution transparente */}
+          <p
+            style={{
+              fontSize: 11,
+              color: "var(--color-text-muted)",
+              marginTop: 6,
+              marginBottom: 8,
+              fontStyle: "italic",
+            }}
+          >
+            {capyTextSource === "llm"
+              ? "Reformulé par IA à partir de sources officielles"
+              : "Explication contrôlée à partir de sources officielles"}
+          </p>
+          <button
+            onClick={() => {
+              setActiveId(null);
+              setCapyText("");
+              setCapyTextSource("static");
+              setFreeTextResponse("");
+              setUserInput("");
+            }}
+            className="capy-back-btn"
+          >
+            Voir une autre question
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ---- Badge priorité ---- */
 function BadgePriorite({ priorite }: { priorite: 1 | 2 | 3 }) {
@@ -50,9 +297,40 @@ function IconExternal() {
 /* ---- Carte démarche ---- */
 function CarteDemarche({ demarche }: { demarche: Demarche }) {
   const [explicationVisible, setExplicationVisible] = useState(false);
+  const [explicationTexte, setExplicationTexte] = useState<string>("");
+  const [explicationTextSource, setExplicationTextSource] = useState<"llm" | "static">("static");
+  const [explicationLoading, setExplicationLoading] = useState(false);
 
   const isP1 = demarche.priorite === 1;
   const explication = getExplicationBloc(demarche);
+
+  function handleExplainToggle() {
+    if (explicationVisible) {
+      setExplicationVisible(false);
+      return;
+    }
+
+    // Affiche immédiatement le texte statique, puis tente LLM en parallèle
+    setExplicationTexte(explication.texte);
+    setExplicationTextSource("static");
+    setExplicationVisible(true);
+    setExplicationLoading(true);
+
+    simplifyWithLLM(
+      {
+        titre: demarche.titre,
+        description_simple: demarche.description_simple,
+        pour_qui: demarche.pour_qui,
+        documents: demarche.documents,
+        source: demarche.source,
+      },
+      explication.texte
+    ).then((result) => {
+      setExplicationTexte(result.text);
+      setExplicationTextSource(result.source);
+      setExplicationLoading(false);
+    });
+  }
 
   return (
     <div
@@ -115,11 +393,26 @@ function CarteDemarche({ demarche }: { demarche: Demarche }) {
         </div>
       )}
 
-      {/* Explication dépliable — Stratégie 1 statique, zéro hallucination */}
+      {/* Explication dépliable — fallback statique garanti, LLM optionnel */}
       {explicationVisible && (
         <div className="encart-explication mb-4">
-          <p style={{ marginBottom: 10 }}>{explication.texte}</p>
-          <p style={{ fontSize: 12, color: "#3B82F6", marginTop: 6 }}>
+          <p style={{ marginBottom: 6 }}>
+            {explicationLoading ? explication.texte : explicationTexte}
+          </p>
+          {/* Attribution transparente */}
+          <p
+            style={{
+              fontSize: 11,
+              color: "var(--color-text-muted)",
+              marginBottom: 8,
+              fontStyle: "italic",
+            }}
+          >
+            {explicationTextSource === "llm"
+              ? "Reformulé par IA à partir de sources officielles"
+              : "Explication contrôlée à partir de sources officielles"}
+          </p>
+          <p style={{ fontSize: 12, color: "#3B82F6", marginTop: 4 }}>
             Source officielle :{" "}
             <a
               href={explication.lien_officiel}
@@ -147,7 +440,7 @@ function CarteDemarche({ demarche }: { demarche: Demarche }) {
           <IconExternal />
         </a>
         <button
-          onClick={() => setExplicationVisible(!explicationVisible)}
+          onClick={handleExplainToggle}
           className="btn-outline"
           style={{ fontSize: 13 }}
         >
@@ -242,6 +535,28 @@ function ResultatsContenu() {
           {reponses.ville ? ` à ${reponses.ville}` : ""}
           {" "}— voici ce que tu dois faire.
         </p>
+
+        {/* Message Capy dynamique */}
+        <div
+          style={{
+            marginTop: 16,
+            padding: 12,
+            background: "#F0F9FF",
+            border: "1px solid #E0F2FE",
+            borderRadius: 10,
+            display: "flex",
+            gap: 10,
+          }}
+        >
+          <span style={{ fontSize: 18, flexShrink: 0 }} aria-hidden="true">
+            🦫
+          </span>
+          <p style={{ fontSize: 14, color: "var(--color-text-body)", lineHeight: 1.5 }}>
+            <strong>Ok, j'ai compris ta situation :</strong> tu es {persona}
+            {reponses.ville ? ` à ${reponses.ville}` : ""}. J'ai préparé{" "}
+            <strong>{prioritaires.length}</strong> démarches prioritaires pour éviter les oublis. On commence par les urgences, puis je t'explique le reste simplement.
+          </p>
+        </div>
       </div>
 
       {/* ---- PRIORITAIRES P1 ---- */}
@@ -271,6 +586,9 @@ function ResultatsContenu() {
           </div>
         </section>
       )}
+
+      {/* ---- BLOC CAPY ---- */}
+      {demarches.length > 0 && <CapyChatSection demarches={demarches} />}
 
       {/* ---- AUCUN RÉSULTAT ---- */}
       {demarches.length === 0 && (

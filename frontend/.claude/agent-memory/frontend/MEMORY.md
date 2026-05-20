@@ -1,0 +1,1 @@
+- [Projet CapAutonomie](project_capautonomie.md) — stack Next.js hackathon, design system CSS custom, composant CapyChatSection ajouté sur /resultats
