@@ -1,0 +1,314 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "date_creation": "2026-05-20",
+    "auteur": "CapAutonomie - Responsable Data",
+    "description": "Démarches administratives essentielles pour jeunes adultes 18-25 ans",
+    "sources_autorisees": [
+      "Service-Public.fr",
+      "CAF.fr",
+      "Ameli.fr",
+      "impots.gouv.fr",
+      "etudiant.gouv.fr",
+      "gouvernement.fr"
+    ]
+  },
+  "demarches": [
+    {
+      "id": "caf-apl",
+      "titre": "APL - Aide au logement CAF",
+      "categorie": "aides",
+      "description_simple": "Touche jusqu'à 300€/mois pour payer ton loyer, dès le 1er mois",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi", "etudiant_etranger"],
+      "conditions": [
+        "Avoir un contrat de location à ton nom ou être en résidence universitaire (CROUS)",
+        "Louer un logement en France",
+        "Le logement doit être ta résidence principale (tu y habites)",
+        "Ton propriétaire doit être inscrit à la CAF (logement conventionné) OU tu peux bénéficier de l'ALS si non conventionné",
+        "Ne pas dépasser un certain niveau de revenus (étudiant sans revenus : tu es quasi systématiquement éligible)"
+      ],
+      "documents": [
+        "Carte d'identité ou passeport",
+        "Contrat de bail signé (le contrat de location)",
+        "RIB (relevé bancaire avec ton IBAN)",
+        "Avis d'imposition de l'année dernière (ou déclaration de revenus parents si tu es à charge)",
+        "Numéro de Sécurité Sociale",
+        "Attestation de scolarité ou contrat de travail"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.caf.fr/allocataires/aides-et-demarches/droits-et-prestations/se-loger/l-aide-personnalisee-au-logement-apl",
+      "source": "CAF.fr",
+      "explication_jeune": "Dès que tu signes ton bail, fonce sur caf.fr et fais ta demande. La CAF te verse une aide directement chaque mois pour t'aider à payer ton loyer, c'est automatique si tu es éligible."
+    },
+    {
+      "id": "assurance-habitation",
+      "titre": "Assurance habitation obligatoire",
+      "categorie": "logement",
+      "description_simple": "Obligatoire pour louer : protège ton appart contre vols, dégâts, incendies",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi", "etudiant_etranger", "tous"],
+      "conditions": [
+        "Obligatoire pour tout locataire avant d'emménager",
+        "Doit couvrir au minimum la responsabilité civile et les risques locatifs",
+        "Doit être souscrite avant la remise des clés (ou au plus tard le jour de la signature du bail)"
+      ],
+      "documents": [
+        "Adresse exacte du logement (numéro, rue, code postal, étage)",
+        "Superficie du logement en m²",
+        "RIB pour le prélèvement automatique",
+        "Carte d'identité"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.service-public.fr/particuliers/vosdroits/F1268",
+      "source": "Service-Public.fr",
+      "explication_jeune": "Ton propriétaire peut refuser de te donner les clés sans cette attestation. Souscris-la en ligne en 10 minutes sur un comparateur (Luko, Lovys, Assurly) ou directement chez une banque, c'est entre 5 et 15€ par mois."
+    },
+    {
+      "id": "secu-ameli",
+      "titre": "Sécurité Sociale - Ameli",
+      "categorie": "sante",
+      "description_simple": "Ton compte sécu : rembourse tes visites chez le médecin et tes médicaments",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi", "etudiant_etranger", "tous"],
+      "conditions": [
+        "Avoir 18 ans révolus (avant : rattaché aux parents automatiquement)",
+        "Résider en France de manière stable",
+        "Si étudiant : l'affiliation est automatique via ton université au 1er septembre",
+        "Si salarié ou alternant : affiliation automatique via ton employeur dès ton 1er jour de travail"
+      ],
+      "documents": [
+        "Carte d'identité ou passeport",
+        "Attestation de scolarité ou contrat de travail",
+        "Justificatif de domicile (facture internet ou quittance de loyer)",
+        "RIB pour les remboursements"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.ameli.fr/assure/droits-demarches/etudes-emploi-retraite/etudes-superieure/etudiant-moins-20-ans",
+      "source": "Ameli.fr",
+      "explication_jeune": "Si tu avais la sécu de tes parents, ça bascule automatiquement sur ton propre compte à 18 ans. Crée ton compte sur ameli.fr pour recevoir ta carte Vitale et suivre tes remboursements santé."
+    },
+    {
+      "id": "impots-premier-emploi",
+      "titre": "Déclaration d'impôts - Premier emploi",
+      "categorie": "impots",
+      "description_simple": "Déclarer tes revenus chaque année en avril/mai, même si tu penses rien devoir",
+      "pour_qui": ["alternant", "premier_emploi", "etudiant"],
+      "conditions": [
+        "Obligatoire dès que tu as eu des revenus dans l'année (salaire, bourse, alternance)",
+        "Délai chaque année : fin avril à début juin selon ton département (date limite affichée sur impots.gouv.fr)",
+        "Si tu n'as eu aucun revenu, tu n'es pas obligé mais c'est recommandé pour avoir un avis de non-imposition (utile pour la CAF)"
+      ],
+      "documents": [
+        "Fiche de paie de décembre (ou tous les bulletins si tu as changé d'employeur)",
+        "Attestation fiscale de l'employeur (envoyée automatiquement en janvier)",
+        "Numéro fiscal (sur la feuille d'impôts de tes parents si c'est ta 1ère fois, sinon sur ton dernier avis)",
+        "RIB si tu as des remboursements à recevoir"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.impots.gouv.fr/particulier/je-declare-mes-revenus-pour-la-1ere-fois",
+      "source": "impots.gouv.fr",
+      "explication_jeune": "Ta 1ère déclaration, c'est intimidant mais ultra simple : tu te crées un compte sur impots.gouv.fr, tu renseignes tes revenus (indiqués sur tes fiches de paie) et tu valides. Ça prend 15 minutes maximum."
+    },
+    {
+      "id": "aide-transport-etudiant",
+      "titre": "Aides transport étudiant et jeune actif",
+      "categorie": "transport",
+      "description_simple": "Jusqu'à 75% de réduction sur ton abonnement transport en commun",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi"],
+      "conditions": [
+        "Employeur : obligé de rembourser 50% de ton abonnement transport en commun (trajet domicile-travail)",
+        "Navigo Imagine R (Île-de-France) : réservé aux étudiants et apprentis de moins de 26 ans",
+        "SNCF : carte Avantage Jeune pour -26 ans, jusqu'à 60% de réduction sur les TGV",
+        "Vérifier les aides locales selon ta ville ou région (souvent des abonnements réduits)"
+      ],
+      "documents": [
+        "Attestation de scolarité ou contrat de travail / alternance",
+        "Justificatif de domicile",
+        "Photo d'identité",
+        "RIB pour les remboursements employeur"
+      ],
+      "priorite": 2,
+      "lien_officiel": "https://www.service-public.fr/particuliers/vosdroits/F19846",
+      "source": "Service-Public.fr",
+      "explication_jeune": "Si tu travailles (CDI, CDD, alternance), ton employeur DOIT te rembourser la moitié de ton abonnement de bus ou métro. Demande le formulaire à ton RH dès le premier jour, c'est ton droit."
+    },
+    {
+      "id": "mutuelle-complementaire-sante",
+      "titre": "Mutuelle / complémentaire santé",
+      "categorie": "sante",
+      "description_simple": "Complète la sécu : rembourse ce qu'elle ne couvre pas (lunettes, dentiste...)",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi", "etudiant_etranger", "tous"],
+      "conditions": [
+        "Si tu es salarié ou alternant : ton employeur doit proposer une mutuelle d'entreprise (tu peux refuser sous conditions)",
+        "Si tu es étudiant non salarié : la mutuelle étudiante Sécurité Sociale Étudiante (SSE) n'existe plus, choisir une mutuelle privée",
+        "Complémentaire Santé Solidaire (CSS) gratuite ou quasi-gratuite si revenus très faibles (moins de ~900€/mois)"
+      ],
+      "documents": [
+        "Numéro de Sécurité Sociale",
+        "Attestation Ameli (à télécharger depuis ameli.fr)",
+        "RIB pour le prélèvement",
+        "Justificatif de revenus si demande CSS"
+      ],
+      "priorite": 2,
+      "lien_officiel": "https://www.service-public.fr/particuliers/vosdroits/F20314",
+      "source": "Service-Public.fr",
+      "explication_jeune": "La sécu rembourse environ 70% des frais médicaux, la mutuelle couvre le reste. Sans mutuelle, une paire de lunettes peut te coûter 200-400€. Commence par vérifier si la mutuelle de ton employeur est intéressante."
+    },
+    {
+      "id": "bourse-crous",
+      "titre": "Bourse CROUS - Aide financière étudiant",
+      "categorie": "aides",
+      "description_simple": "Jusqu'à 661€/mois versés directement si tes revenus familiaux sont faibles",
+      "pour_qui": ["etudiant", "etudiant_etranger"],
+      "conditions": [
+        "Être inscrit dans un établissement d'enseignement supérieur en France",
+        "Avoir moins de 28 ans (35 ans pour certaines situations)",
+        "Les revenus de tes parents doivent être en dessous d'un certain seuil (simulateur sur messervices.etudiant.gouv.fr)",
+        "Être français ou avoir un titre de séjour valide",
+        "Faire la demande chaque année (DSE - Dossier Social Étudiant)"
+      ],
+      "documents": [
+        "Numéro INE (numéro étudiant, sur ton relevé de notes du bac)",
+        "Avis d'imposition de tes parents (N-2, donc 2024 pour l'année 2026-2027)",
+        "Certificat de scolarité de l'année en cours",
+        "RIB à ton nom",
+        "Justificatif de domicile"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.etudiant.gouv.fr/fr/bourse-et-logement-faites-votre-dse-dossier-social-etudiant-401",
+      "source": "etudiant.gouv.fr",
+      "explication_jeune": "La bourse CROUS, c'est de l'argent versé chaque mois selon les revenus de tes parents. Fais ta demande en ligne entre janvier et mai, AVANT de savoir si tu es admis dans une formation, c'est ça la bonne astuce."
+    },
+    {
+      "id": "checklist-premier-appartement",
+      "titre": "Premier appart - Checklist administrative",
+      "categorie": "logement",
+      "description_simple": "Toutes les démarches à faire dans les 15 jours après avoir emménagé",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi", "etudiant_etranger", "tous"],
+      "conditions": [
+        "Dès la signature du bail, tu dois changer d'adresse dans tous les organismes",
+        "Délai légal pour informer : pas de délai légal strict, mais recommandé dans les 15 jours",
+        "Certains changements (impôts, CAF) ont des effets rétroactifs si tu tardes"
+      ],
+      "documents": [
+        "Bail signé (contrat de location)",
+        "Attestation d'assurance habitation",
+        "Justificatif de domicile à ta nouvelle adresse (reçu dès le jour de signature)",
+        "Relevés de compteurs eau, gaz, électricité le jour de l'entrée (photos horodatées)"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.service-public.fr/particuliers/vosdroits/F6" ,
+      "source": "Service-Public.fr",
+      "explication_jeune": "Le jour où tu emménages, prends des photos de TOUT (murs, sols, équipements) et relève tous les compteurs. Ensuite, change ton adresse sur le site officiel changement-adresse.gouv.fr qui notifie automatiquement les organismes.",
+      "checklist_actions": [
+        "Souscrire assurance habitation AVANT d'entrer",
+        "Faire l'état des lieux d'entrée avec le propriétaire (ou agence)",
+        "Relever les compteurs eau, gaz, électricité",
+        "Changer d'adresse sur changement-adresse.gouv.fr",
+        "Faire la demande APL sur caf.fr",
+        "Ouvrir un contrat électricité si pas inclus dans les charges",
+        "Souscrire une box internet",
+        "Notifier ta banque du changement d'adresse"
+      ]
+    },
+    {
+      "id": "titre-sejour-etudiant-etranger",
+      "titre": "Titre de séjour étudiant étranger",
+      "categorie": "autre",
+      "description_simple": "Document obligatoire pour rester étudier en France si tu n'es pas européen",
+      "pour_qui": ["etudiant_etranger"],
+      "conditions": [
+        "Être ressortissant d'un pays hors Union Européenne (UE) et hors Espace Économique Européen (EEE)",
+        "Être inscrit dans un établissement d'enseignement supérieur en France",
+        "Le visa long séjour valant titre de séjour (VLS-TS) doit être validé sur le site de l'OFII dans les 3 mois suivant l'arrivée",
+        "Renouvellement chaque année avant l'expiration du titre actuel"
+      ],
+      "documents": [
+        "Passeport en cours de validité",
+        "Visa long séjour pour études",
+        "Certificat de scolarité ou inscription dans l'établissement",
+        "Justificatif de logement (bail ou attestation d'hébergement)",
+        "Justificatif de ressources financières suffisantes (620€/mois minimum)",
+        "Photos d'identité aux normes",
+        "Timbre fiscal (montant variable selon le titre)"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.service-public.fr/particuliers/vosdroits/N109",
+      "source": "Service-Public.fr",
+      "explication_jeune": "Si tu viens hors Europe, ton visa doit être validé sur le site OFII dans les 3 mois après ton arrivée en France. Ensuite, renouvelle ton titre de séjour chaque année AVANT qu'il expire, sinon tu pourrais être en situation irrégulière."
+    },
+    {
+      "id": "compte-bancaire",
+      "titre": "Ouverture compte bancaire",
+      "categorie": "autre",
+      "description_simple": "Ouvre un compte perso pour recevoir salaire, APL et gérer ton budget",
+      "pour_qui": ["etudiant", "alternant", "premier_emploi", "etudiant_etranger", "tous"],
+      "conditions": [
+        "Avoir 18 ans (sinon compte mineur avec accord parental)",
+        "Droit au compte garanti par la Banque de France si toutes les banques refusent",
+        "Les banques en ligne (Boursorama, Hello Bank, Revolut) acceptent souvent sans revenu minimum"
+      ],
+      "documents": [
+        "Carte d'identité ou passeport en cours de validité",
+        "Justificatif de domicile de moins de 3 mois (facture, quittance de loyer)",
+        "Numéro de téléphone et adresse email",
+        "Pour certaines banques : justificatif de revenus ou d'inscription scolaire"
+      ],
+      "priorite": 1,
+      "lien_officiel": "https://www.service-public.fr/particuliers/vosdroits/F2431",
+      "source": "Service-Public.fr",
+      "explication_jeune": "Sans compte bancaire à ton nom, tu ne peux pas recevoir ton salaire, tes APL ou signer un bail. Ouvre un compte en ligne en 10 minutes (Boursorama, Hello Bank) c'est gratuit et tu n'as pas besoin de gagner de l'argent pour commencer."
+    }
+  ],
+  "page_sources": {
+    "titre": "Sources officielles utilisées",
+    "description": "Toutes les informations de ce fichier sont issues exclusivement de sources gouvernementales françaises officielles.",
+    "sources": [
+      {
+        "nom": "Service-Public.fr",
+        "url": "https://www.service-public.fr",
+        "description": "Le site officiel de l'administration française. Référence principale pour tous les droits et démarches.",
+        "demarches_couvertes": [
+          "assurance-habitation",
+          "aide-transport-etudiant",
+          "mutuelle-complementaire-sante",
+          "checklist-premier-appartement",
+          "titre-sejour-etudiant-etranger",
+          "compte-bancaire"
+        ]
+      },
+      {
+        "nom": "CAF.fr",
+        "url": "https://www.caf.fr",
+        "description": "Caisse d'Allocations Familiales. Gère les aides au logement (APL, ALS, ALF) et autres prestations sociales.",
+        "demarches_couvertes": [
+          "caf-apl"
+        ]
+      },
+      {
+        "nom": "Ameli.fr",
+        "url": "https://www.ameli.fr",
+        "description": "Assurance Maladie en ligne. Gère la Sécurité Sociale, les remboursements santé et la carte Vitale.",
+        "demarches_couvertes": [
+          "secu-ameli"
+        ]
+      },
+      {
+        "nom": "impots.gouv.fr",
+        "url": "https://www.impots.gouv.fr",
+        "description": "Direction Générale des Finances Publiques. Déclaration de revenus, paiement des impôts, consultation des avis.",
+        "demarches_couvertes": [
+          "impots-premier-emploi"
+        ]
+      },
+      {
+        "nom": "etudiant.gouv.fr",
+        "url": "https://www.etudiant.gouv.fr",
+        "description": "Portail étudiant du gouvernement. Bourses CROUS, logement étudiant, DSE (Dossier Social Étudiant).",
+        "demarches_couvertes": [
+          "bourse-crous"
+        ]
+      }
+    ],
+    "date_verification": "2026-05-20",
+    "note": "Les liens ont été vérifiés à la date de création. Si un lien est inactif, se rendre directement sur le site officiel de l'organisme correspondant."
+  }
+}
